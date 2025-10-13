@@ -6,10 +6,11 @@ GO
 CREATE TABLE Proveedor(
 idProveedor INT IDENTITY PRIMARY KEY,
 razonSocial VARCHAR(100) NOT NULL,
-cuit VARCHAR(13) NOT NULL,
+cuit VARCHAR(11) NOT NULL,
 telefono VARCHAR(50),
 email VARCHAR(100),
-CONSTRAINT uniqueProveedorCuit UNIQUE (cuit)
+CONSTRAINT uniqueProveedorCuit UNIQUE (cuit),
+CONSTRAINT checkProveedorCuitLen CHECK (LEN(cuit) = 11)
 );
 
 CREATE TABLE Categoria(
@@ -74,10 +75,11 @@ CONSTRAINT fkProductoIdEtapa FOREIGN KEY (idEtapa) REFERENCES Etapa(idEtapa)
 CREATE TABLE Cliente(
 idCliente INT IDENTITY PRIMARY KEY,
 razonSocial VARCHAR(100) NOT NULL,
-cuit VARCHAR(13) NOT NULL,
+cuit VARCHAR(11) NOT NULL,
 telefono VARCHAR(50),
 email VARCHAR(100),
-CONSTRAINT uniqueClienteCuit UNIQUE (cuit)
+CONSTRAINT uniqueClienteCuit UNIQUE (cuit),
+CONSTRAINT checkClienteCuitLen CHECK (LEN(cuit) = 11)
 );
 
 CREATE TABLE Venta(
