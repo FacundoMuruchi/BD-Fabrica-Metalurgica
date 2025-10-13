@@ -14,7 +14,7 @@ CONSTRAINT checkProveedorCuitLen CHECK (LEN(cuit) = 11)
 );
 
 CREATE TABLE Categoria(
-idCategoria INT IDENTITY PRIMARY KEY,
+idCategoria INT IDENTITY(300,1) PRIMARY KEY,
 tipo VARCHAR(100) NOT NULL,
 descripcion VARCHAR(500)
 );
@@ -42,7 +42,7 @@ CONSTRAINT fkProveedorIdMP FOREIGN KEY (idMP) REFERENCES MateriaPrima(idMP)
 );
 
 CREATE TABLE Deposito(
-idDeposito INT IDENTITY PRIMARY KEY,
+idDeposito INT IDENTITY(300,1) PRIMARY KEY,
 nombre VARCHAR(100) NOT NULL,
 capacidad INT NOT NULL
 );
@@ -58,7 +58,7 @@ CONSTRAINT fkStockIdMP FOREIGN KEY (idMP) REFERENCES MateriaPrima(idMP)
 );
 
 CREATE TABLE Etapa(
-idEtapa INT IDENTITY PRIMARY KEY,
+idEtapa INT IDENTITY(300,1) PRIMARY KEY,
 nombre VARCHAR(100) NOT NULL
 );
 

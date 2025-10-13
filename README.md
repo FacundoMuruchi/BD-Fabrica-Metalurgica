@@ -38,8 +38,9 @@ Este es el plano final de la base de datos. El modelo lógico muestra todas las 
 ```
 .
 ├── diagramas/
-│   ├── modelo_Conceptual.png
-│   └── modelo_Logico.jpg
+│   ├── modelo_conceptual.png
+│   ├── modelo_logico.jpg
+    └── modelo_fisico.jpg
 ├── InduestantDB.sql
 └── README.md
 ```
