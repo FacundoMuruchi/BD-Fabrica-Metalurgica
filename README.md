@@ -17,7 +17,7 @@ El objetivo principal fue diseñar e implementar un sistema de gestión de stock
 
   - ✅ **Registrar** de forma automática las entradas y salidas de materia prima y productos.
   - 🗺️ **Controlar** la ubicación física exacta de cada material dentro del depósito.
-  - 🔗 **Relacionar** materias primas con productos terminados (Bill of Materials) para conocer los insumos de cada fabricación.
+  - 🔗 **Relacionar** materias primas con productos terminados para conocer los insumos de cada fabricación.
   - 🚨 **Generar alertas** cuando un material esté por debajo del stock mínimo o por encima del stock máximo.
   - 📋 **Guardar un historial** completo de movimientos, con fecha, tipo, cantidad y responsable.
 

@@ -1,7 +1,10 @@
 CREATE DATABASE induestant;
+
+GO;
+
 USE induestant;
 
-GO
+GO;
 
 CREATE TABLE Proveedor(
 idProveedor INT IDENTITY PRIMARY KEY,
@@ -10,7 +13,8 @@ cuit VARCHAR(11) NOT NULL,
 telefono VARCHAR(50),
 email VARCHAR(100),
 CONSTRAINT uniqueProveedorCuit UNIQUE (cuit),
-CONSTRAINT checkProveedorCuitLen CHECK (LEN(cuit) = 11)
+CONSTRAINT checkProveedorCuitLen CHECK (LEN(cuit) = 11),
+CONSTRAINT checkProveedorEmail CHECK (email LIKE '%@%.%')
 );
 
 CREATE TABLE Categoria(
@@ -44,7 +48,7 @@ CONSTRAINT fkProveedorIdMP FOREIGN KEY (idMP) REFERENCES MateriaPrima(idMP)
 CREATE TABLE Deposito(
 idDeposito INT IDENTITY(300,1) PRIMARY KEY,
 nombre VARCHAR(100) NOT NULL,
-capacidad INT NOT NULL
+direccion VARCHAR(100) NOT NULL
 );
 
 CREATE TABLE Stock(
@@ -79,7 +83,8 @@ cuit VARCHAR(11) NOT NULL,
 telefono VARCHAR(50),
 email VARCHAR(100),
 CONSTRAINT uniqueClienteCuit UNIQUE (cuit),
-CONSTRAINT checkClienteCuitLen CHECK (LEN(cuit) = 11)
+CONSTRAINT checkClienteCuitLen CHECK (LEN(cuit) = 11),
+CONSTRAINT checkClienteEmail CHECK (email LIKE '%@%.%')
 );
 
 CREATE TABLE Venta(
