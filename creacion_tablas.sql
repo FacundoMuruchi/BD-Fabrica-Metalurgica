@@ -1,10 +1,10 @@
 CREATE DATABASE induestant;
 
-GO;
+GO
 
 USE induestant;
 
-GO;
+GO
 
 CREATE TABLE Proveedor(
 idProveedor INT IDENTITY PRIMARY KEY,
