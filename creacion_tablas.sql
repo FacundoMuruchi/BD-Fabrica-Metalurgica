@@ -112,9 +112,9 @@ CONSTRAINT fkProductoMPIdProducto FOREIGN KEY (idProducto) REFERENCES Producto(i
 CREATE TABLE Movimiento(
 idMovimiento INT IDENTITY(500,1) PRIMARY KEY,
 idProveedor INT,
+idMP INT,
 idVenta INT,
 idProducto INT,
-idMP INT,
 tipoMovimiento VARCHAR(100) NOT NULL,
 cantidad DECIMAL(10,2) NOT NULL,
 fecha DATETIME NOT NULL DEFAULT GETDATE(),

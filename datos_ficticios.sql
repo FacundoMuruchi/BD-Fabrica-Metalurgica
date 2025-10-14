@@ -1,10 +1,6 @@
 USE induestant;
 GO
 
--- #################################################################
--- ### GRUPO 1: TABLAS DE CATÁLOGO (SIN DEPENDENCIAS)
--- #################################################################
-
 -- ### Categoria ###
 PRINT 'Insertando datos en Categoria...';
 INSERT INTO Categoria (tipo, descripcion) VALUES
@@ -23,7 +19,7 @@ GO
 -- ### Deposito ###
 PRINT 'Insertando datos en Deposito...';
 INSERT INTO Deposito (nombre, direccion) VALUES
-('Depósito Central Avellaneda', 'Av. Mitre 5000, Avellaneda'),
+('Depósito Central', 'Pedro Suárez 1108, Luis Guillón'),
 ('Centro Logístico Quilmes', 'Ruta 2 KM 40, Quilmes'),
 ('Almacén La Plata', 'Calle 122 y 50, La Plata'),
 ('Galpón Industrial Pilar', 'Parque Industrial Pilar, Pilar'),
@@ -80,10 +76,6 @@ INSERT INTO Cliente (razonSocial, cuit, telefono, email) VALUES
 ('Muebles de Oficina S.A.', '33109876543', '011-4777-8888', 'mueblesoficina@outlook.com');
 GO
 
--- #################################################################
--- ### GRUPO 2: TABLAS DE INVENTARIO (DEPENDEN DE GRUPO 1)
--- #################################################################
-
 -- ### MateriaPrima ###
 PRINT 'Insertando datos en MateriaPrima...';
 INSERT INTO MateriaPrima (idCategoria, nombre, unidadMedida, stockActual, stockMin, stockMax) VALUES
@@ -114,10 +106,6 @@ INSERT INTO Producto (idEtapa, nombre, descripcion, pUnitario, tFabricacion) VAL
 (309, 'Panel Perforado P-05', 'Panel de 1x1m para colgar herramientas', 4500.00, 2);
 GO
 
--- #################################################################
--- ### GRUPO 3: TABLAS INTERMEDIAS Y TRANSACCIONALES
--- #################################################################
-
 -- ### ProveedorMP ###
 PRINT 'Insertando datos en ProveedorMP...';
 INSERT INTO ProveedorMP (idProveedor, idMP) VALUES
@@ -129,7 +117,12 @@ INSERT INTO ProveedorMP (idProveedor, idMP) VALUES
 (6, 3), -- Chapas del Sur provee Chapas
 (7, 7), -- Abrasivos Nac. provee Discos
 (8, 5), -- Herrajes Met. provee Ruedas
-(10, 10); -- Plásticos Cuyo provee Regatones
+(10, 10), -- Plásticos Cuyo provee Regatones
+(9, 8),   -- Logística Rápida provee Film Stretch
+(5, 9),   -- Pinturas Industriales provee Grasa de Litio
+(1, 6),   -- Acindar también provee Electrodos
+(3, 10),  -- Bulonera Industrial también provee Regatones
+(8, 5);   -- Herrajes Metalúrgicos también provee Ruedas
 GO
 
 -- ### Stock ###
@@ -144,7 +137,13 @@ INSERT INTO Stock (idDeposito, idMP, cantidad, ubicacion) VALUES
 (302, 7, 450, 'Sector Corte, Estantería C1'),
 (308, 8, 60, 'Sector Despacho'),
 (306, 9, 30, 'Pañol de Mantenimiento'),
-(304, 10, 5000, 'Estantería P1, Caja 1-10');
+(304, 10, 5000, 'Estantería P1, Caja 1-10'),
+(303, 1, 3000.00, 'Sector A, Rack 12'),                
+(304, 2, 25000.00, 'Estantería T-08, Caja 40-50'),    
+(300, 4, 20.00, 'Armario de Pinturas P2'),           
+(301, 8, 150.00, 'Sector Embalaje E1'),          
+(300, 3, 500.00, 'Patio Trasero, Lote 3');    
+
 GO
 
 -- ### ProductoMP ###
@@ -159,7 +158,12 @@ INSERT INTO ProductoMP (idProducto, idMP, cantNecesaria) VALUES
 (4, 3, 2.00),  -- Mesa de Trabajo necesita 2m2 de Chapa
 (4, 6, 0.50),  -- Mesa de Trabajo necesita media caja de Electrodos
 (5, 3, 6.00),  -- Armario Metálico necesita 6m2 de Chapa
-(5, 5, 2.00);  -- Armario Metálico necesita 2 Bisagras
+(5, 5, 2.00),  -- Armario Metálico necesita 2 Bisagras
+(3, 1, 25.00),  -- Góndola Central necesita 25m de Perfil de Acero
+(3, 2, 40.00),  -- Góndola Central necesita 40 Tornillos
+(6, 1, 0.50),   -- Accesorio Gancho S necesita 0.5m de Perfil de Acero (alambre)
+(8, 5, 4.00),   -- Carro de Herramientas necesita 4 Ruedas
+(8, 3, 2.50);   -- Carro de Herramientas necesita 2.5m2 de Chapa
 GO
 
 -- ### Venta ###
@@ -174,12 +178,13 @@ INSERT INTO Venta (idProducto, idCliente, cantidad, pTotal) VALUES
 (3, 1, 8, 176000.00),
 (10, 4, 15, 67500.00),
 (7, 5, 30, 75000.00),
-(1, 2, 12, 180000.00);
+(1, 2, 12, 180000.00),
+(3, 1, 5, 110000.00), 
+(5, 6, 10, 250000.00),
+(1, 7, 15, 225000.00),
+(9, 10, 20, 240000.00),
+(4, 2, 8, 144000.00); 
 GO
-
--- #################################################################
--- ### GRUPO 4: TABLA DE MOVIMIENTOS (LA ÚLTIMA EN LLENARSE)
--- #################################################################
 
 -- ### Movimiento ###
 PRINT 'Insertando datos en Movimiento...';
@@ -187,16 +192,27 @@ INSERT INTO Movimiento (tipoMovimiento, cantidad, idProveedor, idMP) VALUES
 ('Ingreso por compra', 1000, 1, 1),
 ('Ingreso por compra', 5000, 3, 2),
 ('Ingreso por compra', 200, 2, 3),
-('Ingreso por compra', 30, 5, 4);
+('Ingreso por compra', 30, 5, 4),
+('Ingreso por compra', 800.00, 2, 1),     
+('Ingreso por compra', 10000.00, 4, 2);  
+
 
 INSERT INTO Movimiento (tipoMovimiento, cantidad, idVenta, idProducto) VALUES
 ('Salida por venta', -10, 100, 1),
 ('Salida por venta', -20, 101, 2),
 ('Salida por venta', -5, 102, 1),
-('Salida por venta', -2, 103, 4);
+('Salida por venta', -2, 103, 4),
+('Salida por venta', -5, 110, 3),  
+('Salida por venta', -10, 111, 5), 
+('Salida por venta', -15, 112, 1), 
+('Salida por venta', -20, 113, 9),  
+('Salida por venta', -8, 114, 4);  
 
 INSERT INTO Movimiento (tipoMovimiento, cantidad, idMP) VALUES
 ('Salida para producción', -125, 1), -- (10 racks * 12.5m cada uno)
 ('Salida para producción', -160, 2), -- (10 racks * 16 tornillos cada uno)
 ('Ajuste de inventario', 5.5, 1), -- Se encontró un sobrante de Perfil de Acero
-('Ajuste por rotura', -10, 5); -- Se rompieron 10 ruedas
+('Ajuste por rotura', -10, 5), -- Se rompieron 10 ruedas
+('Salida para producción', -250.00, 1), -- Se usan 250m de Perfil de Acero para fabricar Góndolas
+('Salida para producción', -400.00, 2), -- Se usan 400 tornillos para las mismas Góndolas
+('Ajuste de inventario', -10.00, 10);   -- Se pierden 10 regatones durante el conteo
