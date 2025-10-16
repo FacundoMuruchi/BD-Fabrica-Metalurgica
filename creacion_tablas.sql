@@ -37,12 +37,14 @@ CONSTRAINT cantStockMin CHECK (stockMin >= 0),
 CONSTRAINT cantStockMax CHECK (stockMax >= 0)
 );
 
-CREATE TABLE ProveedorMP(
-idProveedorMP INT IDENTITY(100,1) PRIMARY KEY,
+CREATE TABLE Ingreso(
+idIngreso INT IDENTITY(100,1) PRIMARY KEY,
 idProveedor INT NOT NULL,
 idMP INT NOT NULL,
+cantidad DECIMAL(10,2) NOT NULL,
 CONSTRAINT fkProveedorIdProveedor FOREIGN KEY (idProveedor) REFERENCES Proveedor(idProveedor),
-CONSTRAINT fkProveedorIdMP FOREIGN KEY (idMP) REFERENCES MateriaPrima(idMP)
+CONSTRAINT fkProveedorIdMP FOREIGN KEY (idMP) REFERENCES MateriaPrima(idMP),
+CONSTRAINT checkIngresoCantidad CHECK (cantidad > 0)
 );
 
 CREATE TABLE Deposito(
@@ -93,7 +95,6 @@ idProducto INT NOT NULL,
 idCliente INT NOT NULL,
 cantidad INT NOT NULL,
 pTotal DECIMAL(10,2) NOT NULL,
-fecha DATETIME NOT NULL DEFAULT GETDATE(),
 CONSTRAINT fkVentaIdProducto FOREIGN KEY (idProducto) REFERENCES Producto(idProducto),
 CONSTRAINT fkVentaIdCliente FOREIGN KEY (idCliente) REFERENCES Cliente(idCliente),
 CONSTRAINT checkVentaCantidad CHECK (cantidad > 0),
@@ -111,15 +112,10 @@ CONSTRAINT fkProductoMPIdProducto FOREIGN KEY (idProducto) REFERENCES Producto(i
 
 CREATE TABLE Movimiento(
 idMovimiento INT IDENTITY(500,1) PRIMARY KEY,
-idProveedor INT,
-idMP INT,
 idVenta INT,
-idProducto INT,
+idIngreso INT,
 tipoMovimiento VARCHAR(100) NOT NULL,
-cantidad DECIMAL(10,2) NOT NULL,
 fecha DATETIME NOT NULL DEFAULT GETDATE(),
-CONSTRAINT fkMovimientoIdProveedor FOREIGN KEY (idProveedor) REFERENCES Proveedor(idProveedor),
 CONSTRAINT fkMovimientoIdVenta FOREIGN KEY (idVenta) REFERENCES Venta(idVenta),
-CONSTRAINT fkMovimientoIdProducto FOREIGN KEY (idProducto) REFERENCES Producto(idProducto),
-CONSTRAINT fkMovimientoIdMP FOREIGN KEY (idMP) REFERENCES MateriaPrima(idMP)
+CONSTRAINT fkMovimientoIdIngreso FOREIGN KEY (idIngreso) REFERENCES Ingreso(idIngreso)
 );
