@@ -32,7 +32,7 @@ INSERT INTO Categoria (tipo, descripcion) VALUES
 ('Soldaduras', 'Varillas y alambres para soldadura.');
 
 -- =====================
--- 3. MATERIAS PRIMAS (stockActual = cantidad de ingreso)
+-- 3. MATERIAS PRIMAS
 -- =====================
 INSERT INTO MateriaPrima (idCategoria, nombre, unidadMedida, stockActual, stockMin, stockMax) VALUES
 (300, 'Acero SAE 1020', 'kg', 1000, 500, 3000),
@@ -47,7 +47,7 @@ INSERT INTO MateriaPrima (idCategoria, nombre, unidadMedida, stockActual, stockM
 (309, 'Varilla de Soldadura MIG', 'kg', 150, 50, 700);
 
 -- =====================
--- 4. INGRESOS (coherentes con stockActual)
+-- 4. INGRESOS
 -- =====================
 INSERT INTO Ingreso (idProveedor, idMP, cantidad) VALUES
 (1, 1, 1000), 
