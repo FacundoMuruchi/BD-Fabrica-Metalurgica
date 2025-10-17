@@ -41,16 +41,24 @@ CREATE TABLE Ingreso(
 idIngreso INT IDENTITY(100,1) PRIMARY KEY,
 idProveedor INT NOT NULL,
 idMP INT NOT NULL,
-cantidad DECIMAL(10,2) NOT NULL,
 CONSTRAINT fkProveedorIdProveedor FOREIGN KEY (idProveedor) REFERENCES Proveedor(idProveedor),
-CONSTRAINT fkProveedorIdMP FOREIGN KEY (idMP) REFERENCES MateriaPrima(idMP),
-CONSTRAINT checkIngresoCantidad CHECK (cantidad > 0)
+CONSTRAINT fkProveedorIdMP FOREIGN KEY (idMP) REFERENCES MateriaPrima(idMP)
+);
+
+CREATE TABLE Direccion(
+idDireccion INT IDENTITY(300,1) PRIMARY KEY,
+calle VARCHAR(100) NOT NULL,
+altura INT NOT NULL,
+cp VARCHAR(50) NOT NULL,
+ciudad VARCHAR(100) NOT NULL,
+provincia VARCHAR(100) NOT NULL,
 );
 
 CREATE TABLE Deposito(
 idDeposito INT IDENTITY(300,1) PRIMARY KEY,
 nombre VARCHAR(100) NOT NULL,
-direccion VARCHAR(100) NOT NULL
+idDireccion INT NOT NULL,
+CONSTRAINT fkDepositoIdDireccion FOREIGN KEY (idDireccion) REFERENCES Direccion(idDireccion)
 );
 
 CREATE TABLE Stock(
@@ -93,11 +101,9 @@ CREATE TABLE Venta(
 idVenta INT IDENTITY(100,1) PRIMARY KEY,
 idProducto INT NOT NULL,
 idCliente INT NOT NULL,
-cantidad INT NOT NULL,
 pTotal DECIMAL(10,2) NOT NULL,
 CONSTRAINT fkVentaIdProducto FOREIGN KEY (idProducto) REFERENCES Producto(idProducto),
 CONSTRAINT fkVentaIdCliente FOREIGN KEY (idCliente) REFERENCES Cliente(idCliente),
-CONSTRAINT checkVentaCantidad CHECK (cantidad > 0),
 CONSTRAINT checkVentaPTotal CHECK (pTotal >= 0)
 );
 
@@ -110,12 +116,20 @@ CONSTRAINT fkProductoMPIdMP FOREIGN KEY (idMP) REFERENCES MateriaPrima(idMP),
 CONSTRAINT fkProductoMPIdProducto FOREIGN KEY (idProducto) REFERENCES Producto(idProducto)
 );
 
+CREATE TABLE TipoMovimiento(
+idTipoMovimiento INT IDENTITY(300,1) PRIMARY KEY,
+tipo VARCHAR(50) NOT NULL
+);
+
 CREATE TABLE Movimiento(
 idMovimiento INT IDENTITY(500,1) PRIMARY KEY,
 idVenta INT,
 idIngreso INT,
-tipoMovimiento VARCHAR(100) NOT NULL,
+idTipoMovimiento INT NOT NULL,
+cantidad DECIMAL(10,2) NOT NULL,
 fecha DATETIME NOT NULL DEFAULT GETDATE(),
 CONSTRAINT fkMovimientoIdVenta FOREIGN KEY (idVenta) REFERENCES Venta(idVenta),
-CONSTRAINT fkMovimientoIdIngreso FOREIGN KEY (idIngreso) REFERENCES Ingreso(idIngreso)
+CONSTRAINT fkMovimientoIdIngreso FOREIGN KEY (idIngreso) REFERENCES Ingreso(idIngreso),
+CONSTRAINT fkMovimientoIdTipoMovimiento FOREIGN KEY (idTipoMovimiento) REFERENCES TipoMovimiento(idTipoMovimiento),
+CONSTRAINT checkMovimientoCantidad CHECK (cantidad > 0)
 );
