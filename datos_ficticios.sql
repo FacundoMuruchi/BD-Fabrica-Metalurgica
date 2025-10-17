@@ -20,16 +20,16 @@ INSERT INTO Proveedor (razonSocial, cuit, telefono, email) VALUES
 -- 2️ CATEGORÍAS
 -- ======================================
 INSERT INTO Categoria (tipo, descripcion) VALUES
-('Aceros', 'Materiales de acero para estructuras y piezas metálicas.'),
-('Aluminio', 'Aleaciones ligeras para componentes.'),
+('Aceros', 'Materiales de acero para estructuras.'),
+('Aluminio', 'Aleaciones livianas.'),
 ('Cobre', 'Usado para conexiones eléctricas.'),
 ('Tornillería', 'Tornillos, tuercas y arandelas.'),
-('Pinturas', 'Pinturas y recubrimientos protectores.'),
-('Lubricantes', 'Aceites y grasas industriales.'),
-('Fundición', 'Metales fundidos para piezas pesadas.'),
-('Planchas', 'Planchas metálicas para corte y doblado.'),
-('Tubos', 'Tuberías y perfiles huecos.'),
-('Soldaduras', 'Varillas y alambres para soldadura.');
+('Pinturas', 'Pinturas y recubrimientos.'),
+('Lubricantes', 'Aceites industriales.'),
+('Fundición', 'Metales fundidos para piezas.'),
+('Planchas', 'Planchas metálicas.'),
+('Tubos', 'Tuberías metálicas.'),
+('Soldaduras', 'Varillas de soldadura.');
 
 -- ======================================
 -- 3️ MATERIAS PRIMAS
@@ -44,55 +44,10 @@ INSERT INTO MateriaPrima (idCategoria, nombre, unidadMedida, stockActual, stockM
 (306, 'Hierro Fundido', 'kg', 800, 200, 2500),
 (307, 'Plancha de Acero 3mm', 'm2', 300, 200, 1200),
 (308, 'Tubo de Acero 2”', 'm', 900, 300, 2500),
-(309, 'Varilla de Soldadura MIG', 'kg', 150, 50, 700);
+(309, 'Varilla MIG', 'kg', 150, 50, 700);
 
 -- ======================================
--- 4 DIRECCIONES
--- ======================================
-INSERT INTO Direccion (calle, altura, cp, ciudad, provincia) VALUES
-('Av. San Martín', 4500, '1417', 'CABA', 'Buenos Aires'),
-('Ruta 8', 35000, '1618', 'Tigre', 'Buenos Aires'),
-('Av. Calchaquí', 1200, '1878', 'Quilmes', 'Buenos Aires'),
-('Moreno', 2300, '1708', 'Morón', 'Buenos Aires'),
-('Camino Gral. Belgrano', 5600, '1874', 'Avellaneda', 'Buenos Aires'),
-('Parque Industrial Pilar', 100, '1629', 'Pilar', 'Buenos Aires'),
-('Parque Industrial Ezeiza', 200, '1804', 'Ezeiza', 'Buenos Aires'),
-('Av. Mitre', 800, '1871', 'Dock Sud', 'Buenos Aires'),
-('9 de Julio', 2500, '1824', 'Lanús Oeste', 'Buenos Aires'),
-('Oliden', 1900, '1832', 'Lomas de Zamora', 'Buenos Aires');
-
--- ======================================
--- 5️ DEPÓSITOS
--- ======================================
-INSERT INTO Deposito (nombre, idDireccion) VALUES
-('Depósito Central', 300),
-('Depósito Norte', 301),
-('Depósito Sur', 302),
-('Depósito Oeste', 303),
-('Depósito Este', 304),
-('Depósito Industrial 1', 305),
-('Depósito Industrial 2', 306),
-('Depósito Logístico', 307),
-('Depósito Metalúrgico', 308),
-('Depósito Auxiliar', 309);
-
--- ======================================
--- 6️ STOCK
--- ======================================
-INSERT INTO Stock (idDeposito, idMP, cantidad, ubicacion) VALUES
-(300, 1, 1000, 'Sector A1'),
-(301, 2, 500, 'Sector B2'),
-(302, 3, 200, 'Sector C1'),
-(303, 4, 4000, 'Sector D4'),
-(304, 5, 100, 'Sector E1'),
-(305, 6, 50, 'Sector F3'),
-(306, 7, 800, 'Sector G2'),
-(307, 8, 300, 'Sector H1'),
-(308, 9, 900, 'Sector I2'),
-(309, 10, 150, 'Sector J3');
-
--- ======================================
--- 7️ INGRESOS
+-- 4️ INGRESOS
 -- ======================================
 INSERT INTO Ingreso (idProveedor, idMP) VALUES
 (1, 1),
@@ -107,7 +62,67 @@ INSERT INTO Ingreso (idProveedor, idMP) VALUES
 (10, 10);
 
 -- ======================================
--- 8️ ETAPAS
+-- 5️ DIRECCIONES
+-- ======================================
+INSERT INTO Direccion (calle, altura, cp, ciudad, provincia) VALUES
+('Av. San Martín', 4500, '1417', 'CABA', 'Buenos Aires'),
+('Ruta 8', 35000, '1618', 'Tigre', 'Buenos Aires'),
+('Av. Calchaquí', 1200, '1878', 'Quilmes', 'Buenos Aires'),
+('Moreno', 2300, '1708', 'Morón', 'Buenos Aires'),
+('Camino Gral. Belgrano', 5600, '1874', 'Avellaneda', 'Buenos Aires'),
+('Parque Industrial Pilar', 100, '1629', 'Pilar', 'Buenos Aires'),
+('Parque Industrial Ezeiza', 200, '1804', 'Ezeiza', 'Buenos Aires'),
+('Av. Mitre', 800, '1871', 'Dock Sud', 'Buenos Aires'),
+('9 de Julio', 2500, '1824', 'Lanús Oeste', 'Buenos Aires'),
+('Oliden', 1900, '1832', 'Lomas de Zamora', 'Buenos Aires');
+
+-- ======================================
+-- 6️ DEPÓSITOS
+-- ======================================
+INSERT INTO Deposito (nombre, idDireccion) VALUES
+('Depósito Central', 300),
+('Depósito Norte', 301),
+('Depósito Sur', 302),
+('Depósito Oeste', 303),
+('Depósito Este', 304),
+('Depósito Pilar', 305),
+('Depósito Ezeiza', 306),
+('Depósito Dock Sud', 307),
+('Depósito Lanús', 308),
+('Depósito Lomas', 309);
+
+-- ======================================
+-- 7️ UBICACIONES
+-- ======================================
+INSERT INTO Ubicacion (idDeposito, pasillo, columna, nivel) VALUES
+(300, 1, 'A', 1),
+(300, 1, 'B', 2),
+(301, 2, 'A', 1),
+(302, 3, 'C', 1),
+(303, 1, 'D', 1),
+(304, 2, 'E', 1),
+(305, 1, 'F', 2),
+(306, 2, 'G', 1),
+(307, 3, 'H', 1),
+(308, 1, 'I', 1);
+
+-- ======================================
+-- 8️ STOCK
+-- ======================================
+INSERT INTO Stock (idUbicacion, idMP, cantidad) VALUES
+(300, 1, 1000),
+(301, 2, 500),
+(302, 3, 200),
+(303, 4, 4000),
+(304, 5, 100),
+(305, 6, 50),
+(306, 7, 800),
+(307, 8, 300),
+(308, 9, 900),
+(309, 10, 150);
+
+-- ======================================
+-- 9️ ETAPAS
 -- ======================================
 INSERT INTO Etapa (nombre) VALUES
 ('Corte de Materiales'),
@@ -122,22 +137,22 @@ INSERT INTO Etapa (nombre) VALUES
 ('Reparación');
 
 -- ======================================
--- 9️ PRODUCTOS
+-- 10 PRODUCTOS
 -- ======================================
 INSERT INTO Producto (idEtapa, nombre, descripcion, pUnitario, tFabricacion) VALUES
 (300, 'Estructura Base', 'Estructura metálica principal.', 12000, 5),
 (301, 'Chasis Liviano', 'Chasis para maquinaria.', 15000, 6),
 (302, 'Puerta Industrial', 'Puerta reforzada de acero.', 8000, 4),
 (303, 'Baranda Metálica', 'Baranda de seguridad galvanizada.', 4000, 3),
-(304, 'Tanque Presurizado', 'Tanque cilíndrico de acero inoxidable.', 25000, 8),
-(305, 'Pieza Fundida', 'Componente moldeado por fundición.', 10000, 7),
-(306, 'Gabinete Eléctrico', 'Caja metálica con recubrimiento epoxi.', 7000, 5),
-(307, 'Rejilla Antideslizante', 'Rejilla de acero galvanizado.', 5000, 3),
-(308, 'Soporte Tubular', 'Estructura de soporte de tubos.', 6000, 4),
-(309, 'Panel de Protección', 'Panel laminado de seguridad.', 4500, 3);
+(304, 'Tanque Presurizado', 'Tanque de acero inoxidable.', 25000, 8),
+(305, 'Pieza Fundida', 'Componente moldeado.', 10000, 7),
+(306, 'Gabinete Eléctrico', 'Caja metálica pintada.', 7000, 5),
+(307, 'Rejilla Antideslizante', 'Rejilla galvanizada.', 5000, 3),
+(308, 'Soporte Tubular', 'Estructura para soporte.', 6000, 4),
+(309, 'Panel de Protección', 'Panel laminado.', 4500, 3);
 
 -- ======================================
--- 10 CLIENTES
+-- 11️ CLIENTES
 -- ======================================
 INSERT INTO Cliente (razonSocial, cuit, telefono, email) VALUES
 ('Construcciones del Plata', '30711111111', '011-4655-1234', 'compras@cdplata.com'),
@@ -152,23 +167,22 @@ INSERT INTO Cliente (razonSocial, cuit, telefono, email) VALUES
 ('Industrias del Sur', '30710101010', '011-4555-1010', 'ventas@indsur.com');
 
 -- ======================================
--- 11️ VENTAS
+-- 12️ VENTAS
 -- ======================================
 INSERT INTO Venta (idProducto, idCliente, pTotal) VALUES
-(1, 1, 24000.00),
-(2, 2, 15000.00),
-(3, 3, 24000.00),
-(4, 4, 20000.00),
-(5, 5, 25000.00),
-(6, 6, 20000.00),
-(7, 7, 28000.00),
-(8, 8, 10000.00),
-(9, 9, 18000.00),
-(10, 10, 4500.00);
-
+(1, 1, 24000),
+(2, 2, 15000),
+(3, 3, 24000),
+(4, 4, 20000),
+(5, 5, 25000),
+(6, 6, 20000),
+(7, 7, 28000),
+(8, 8, 10000),
+(9, 9, 18000),
+(10, 10, 4500);
 
 -- ======================================
--- 12️ PRODUCTO-MATERIA PRIMA
+-- 13️ PRODUCTO-MATERIA PRIMA
 -- ======================================
 INSERT INTO ProductoMP (idMP, idProducto, cantNecesaria) VALUES
 (1, 1, 200),
@@ -183,24 +197,31 @@ INSERT INTO ProductoMP (idMP, idProducto, cantNecesaria) VALUES
 (10, 10, 50);
 
 -- ======================================
--- 13 TIPOS DE MOVIMIENTO
+-- 14️ TIPO MOVIMIENTO
 -- ======================================
 INSERT INTO TipoMovimiento (tipo) VALUES
 ('Ingreso de Materia Prima'),
-('Venta de Producto');
+('Venta de Producto'),
+('Ajuste Positivo'),
+('Ajuste Negativo'),
+('Transferencia Interna'),
+('Devolución de Cliente'),
+('Devolución a Proveedor'),
+('Consumo Interno'),
+('Producción'),
+('Inventario Inicial');
 
 -- ======================================
--- 14 MOVIMIENTOS
+-- 15️ MOVIMIENTOS
 -- ======================================
 INSERT INTO Movimiento (idVenta, idIngreso, idTipoMovimiento, cantidad, fecha) VALUES
-(NULL, 100, 300, 1000, DATEADD(DAY, -20, GETDATE())),   -- Ingreso de Acero SAE 1020
-(NULL, 101, 300, 500,  DATEADD(DAY, -19, GETDATE())),   -- Ingreso de Aluminio 6061
-(NULL, 102, 300, 200,  DATEADD(DAY, -18, GETDATE())),   -- Ingreso de Cobre
-(NULL, 103, 300, 4000, DATEADD(DAY, -17, GETDATE())),   -- Ingreso de Tornillos
-(NULL, 104, 300, 100,  DATEADD(DAY, -16, GETDATE())),   -- Ingreso de Pintura Epoxi Azul
-
-(100, NULL, 301, 2,    DATEADD(DAY, -10, GETDATE())),   -- Venta de Estructura Base
-(101, NULL, 301, 1,    DATEADD(DAY, -9, GETDATE())),    -- Venta de Chasis Liviano
-(102, NULL, 301, 3,    DATEADD(DAY, -8, GETDATE())),    -- Venta de Puerta Industrial
-(103, NULL, 301, 5,    DATEADD(DAY, -7, GETDATE())),    -- Venta de Baranda Metálica
-(104, NULL, 301, 1,    DATEADD(DAY, -6, GETDATE()));    -- Venta de Tanque Presurizado
+(NULL, 100, 300, 1000, DATEADD(DAY, -20, GETDATE())),
+(NULL, 101, 300, 500, DATEADD(DAY, -19, GETDATE())),
+(NULL, 102, 300, 200, DATEADD(DAY, -18, GETDATE())),
+(NULL, 103, 300, 4000, DATEADD(DAY, -17, GETDATE())),
+(NULL, 104, 300, 100, DATEADD(DAY, -16, GETDATE())),
+(100, NULL, 301, 2, DATEADD(DAY, -10, GETDATE())),
+(101, NULL, 301, 1, DATEADD(DAY, -9, GETDATE())),
+(102, NULL, 301, 3, DATEADD(DAY, -8, GETDATE())),
+(103, NULL, 301, 5, DATEADD(DAY, -7, GETDATE())),
+(104, NULL, 301, 1, DATEADD(DAY, -6, GETDATE()));

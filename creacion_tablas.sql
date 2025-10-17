@@ -32,9 +32,9 @@ stockActual DECIMAL(10,2) NOT NULL,
 stockMin DECIMAL(10,2),
 stockMax DECIMAL(10,2),
 CONSTRAINT fkIdCateogria FOREIGN KEY (idCategoria) REFERENCES Categoria(idCategoria),
-CONSTRAINT cantStockActual CHECK (stockActual >= 0),
-CONSTRAINT cantStockMin CHECK (stockMin >= 0),
-CONSTRAINT cantStockMax CHECK (stockMax >= 0)
+CONSTRAINT checkCantStockActual CHECK (stockActual >= 0),
+CONSTRAINT checkCantStockMin CHECK (stockMin >= 0),
+CONSTRAINT checkCantStockMax CHECK (stockMax >= 0)
 );
 
 CREATE TABLE Ingreso(
@@ -61,13 +61,22 @@ idDireccion INT NOT NULL,
 CONSTRAINT fkDepositoIdDireccion FOREIGN KEY (idDireccion) REFERENCES Direccion(idDireccion)
 );
 
+CREATE TABLE Ubicacion(
+idUbicacion INT IDENTITY(300,1) PRIMARY KEY,
+idDeposito INT NOT NULL,
+pasillo INT NOT NULL,
+columna CHAR(1) NOT NULL,
+nivel INT NOT NULL,
+CONSTRAINT fkUbicacionIdDeposito FOREIGN KEY (idDeposito) REFERENCES Deposito(idDeposito),
+CONSTRAINT checkUbicacionColumna CHECK (columna LIKE '[A-Z]')
+);
+
 CREATE TABLE Stock(
 idStock INT IDENTITY(100,1) PRIMARY KEY,
-idDeposito INT NOT NULL,
+idUbicacion INT NOT NULL,
 idMP INT NOT NULL,
 cantidad DECIMAL(10,2) NOT NULL,
-ubicacion VARCHAR(100),
-CONSTRAINT fkStockIdDeposito FOREIGN KEY (idDeposito) REFERENCES Deposito(idDeposito),
+CONSTRAINT fkStockIdUbicacion FOREIGN KEY (idUbicacion) REFERENCES Ubicacion(idUbicacion),
 CONSTRAINT fkStockIdMP FOREIGN KEY (idMP) REFERENCES MateriaPrima(idMP)
 );
 
