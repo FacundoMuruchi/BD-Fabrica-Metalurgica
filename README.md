@@ -46,8 +46,9 @@ Este es el plano final de la base de datos. El modelo lógico muestra todas las 
 └── README.md
 ```
 
-  - **`/Diagramas`**: Contiene los diagramas Entidad-Relación (Conceptual y Lógico) del proyecto.
-  - **`InduestantDB.sql`**: Script principal de T-SQL que contiene el código para crear la base de datos, todas las tablas y sus restricciones (Modelo Físico).
+  - **`/diagramas`**: Contiene los diagramas Entidad-Relación (Conceptual y Lógico) del proyecto.
+  - **`creacion_tablas.sql`**: Script de creacion de tablas.
+  - **`datos_ficticios.sql`**: Script de generacion de datos simulados.
   - **`README.md`**: Este archivo.
 
 ## ✨ Características Principales
