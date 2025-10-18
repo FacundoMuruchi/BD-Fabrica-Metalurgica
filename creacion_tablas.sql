@@ -23,18 +23,24 @@ tipo VARCHAR(100) NOT NULL,
 descripcion VARCHAR(500)
 );
 
+CREATE TABLE UnidadMedida(
+idUnidadMedida INT IDENTITY(300,1) PRIMARY KEY,
+unidad VARCHAR(50) NOT NULL
+);
+
 CREATE TABLE MateriaPrima(
 idMP INT IDENTITY PRIMARY KEY,
 idCategoria INT NOT NULL,
 nombre VARCHAR(100) NOT NULL,
-unidadMedida VARCHAR(50) NOT NULL,
+idUnidadMedida INT NOT NULL,
 stockActual DECIMAL(10,2) NOT NULL,
 stockMin DECIMAL(10,2),
 stockMax DECIMAL(10,2),
 CONSTRAINT fkIdCateogria FOREIGN KEY (idCategoria) REFERENCES Categoria(idCategoria),
-CONSTRAINT checkCantStockActual CHECK (stockActual >= 0),
-CONSTRAINT checkCantStockMin CHECK (stockMin >= 0),
-CONSTRAINT checkCantStockMax CHECK (stockMax >= 0)
+CONSTRAINT fkMateriaPrimaIdUnidadMedida FOREIGN KEY (idUnidadMedida) REFERENCES UnidadMedida(idUnidadMedida),
+CONSTRAINT checkMateriaPrimaCantStockActual CHECK (stockActual >= 0),
+CONSTRAINT checkMateriaPrimaCantStockMin CHECK (stockMin >= 0),
+CONSTRAINT checkMateriaPrimaCantStockMax CHECK (stockMax >= 0)
 );
 
 CREATE TABLE Ingreso(
@@ -134,11 +140,19 @@ CREATE TABLE Movimiento(
 idMovimiento INT IDENTITY(500,1) PRIMARY KEY,
 idVenta INT,
 idIngreso INT,
+idMP INT,
+idProducto INT,
 idTipoMovimiento INT NOT NULL,
 cantidad DECIMAL(10,2) NOT NULL,
+observacion VARCHAR(300),
 fecha DATETIME NOT NULL DEFAULT GETDATE(),
 CONSTRAINT fkMovimientoIdVenta FOREIGN KEY (idVenta) REFERENCES Venta(idVenta),
 CONSTRAINT fkMovimientoIdIngreso FOREIGN KEY (idIngreso) REFERENCES Ingreso(idIngreso),
+CONSTRAINT fkMovimientoIdMP FOREIGN KEY (idMP) REFERENCES MateriaPrima(idMP),
+CONSTRAINT fkMovimientoIdProducto FOREIGN KEY (idProducto) REFERENCES Producto(idProducto),
 CONSTRAINT fkMovimientoIdTipoMovimiento FOREIGN KEY (idTipoMovimiento) REFERENCES TipoMovimiento(idTipoMovimiento),
-CONSTRAINT checkMovimientoCantidad CHECK (cantidad > 0)
-);
+CONSTRAINT checkMovimientoCantidad CHECK (cantidad > 0),
+CONSTRAINT checkMovimientoConsistencia CHECK (
+(idIngreso IS NULL AND idVenta IS NULL AND (idMP IS NOT NULL OR idProducto IS NOT NULL)) OR -- AJUSTE
+(idMP IS NULL AND idProducto IS NULL AND (idIngreso IS NOT NULL OR idVenta IS NOT NULL)) -- VENTA/INGRESO
+));
