@@ -40,8 +40,9 @@ Este es el plano final de la base de datos. El modelo lógico muestra todas las 
 ├── diagramas/
 │   ├── modelo_conceptual.png
 │   ├── modelo_logico.jpg
-    └── modelo_fisico.jpg
-├── InduestantDB.sql
+│   └── modelo_fisico.jpg
+├── creacion_tablas.sql
+├── datos_ficticios.sql
 └── README.md
 ```
 
