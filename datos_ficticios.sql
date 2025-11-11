@@ -181,14 +181,42 @@ INSERT INTO TipoMovimiento (tipo) VALUES
 ('Inventario Inicial');
 
 -- MOVIMIENTO (empieza en 500)
+-- INGRESOS DE MATERIA PRIMA
 INSERT INTO Movimiento (idVenta, idIngreso, idMP, idProducto, idTipoMovimiento, cantidad, observacion, fecha) VALUES
-(NULL,100,NULL,NULL,300,1000,'Ingreso de acero SAE 1020',DATEADD(DAY,-20,GETDATE())),
-(NULL,101,NULL,NULL,300,500,'Ingreso de aluminio 6061',DATEADD(DAY,-19,GETDATE())),
-(100,NULL,NULL,NULL,301,2,'Venta de estructura base',DATEADD(DAY,-10,GETDATE())),
-(102,NULL,NULL,NULL,301,3,'Venta de puerta industrial',DATEADD(DAY,-8,GETDATE())),
-(NULL,NULL,4,NULL,303,100,'Ajuste negativo: pérdida de tornillos',DATEADD(DAY,-5,GETDATE())),
-(NULL,NULL,5,NULL,302,50,'Ajuste positivo: sobrante de pintura',DATEADD(DAY,-4,GETDATE())),
-(NULL,NULL,1,NULL,304,200,'Transferencia interna de acero',DATEADD(DAY,-3,GETDATE())),
-(NULL,NULL,NULL,2,308,1,'Producción interna de chasis',DATEADD(DAY,-2,GETDATE())),
-(NULL,NULL,NULL,5,305,1,'Devolución de cliente',DATEADD(DAY,-1,GETDATE())),
-(NULL,109,NULL,NULL,300,150,'Ingreso de varillas MIG',GETDATE());
+(NULL, 100, NULL, NULL, 300, 1000, 'Compra mensual de acero SAE 1020', DATEADD(DAY, -30, GETDATE())),
+(NULL, 101, NULL, NULL, 300, 500, 'Ingreso de aluminio para chasis', DATEADD(DAY, -28, GETDATE())),
+(NULL, 102, NULL, NULL, 300, 200, 'Cobre para conexiones eléctricas', DATEADD(DAY, -26, GETDATE())),
+(NULL, 103, NULL, NULL, 300, 4000, 'Lote de tornillería variada', DATEADD(DAY, -24, GETDATE())),
+(NULL, 104, NULL, NULL, 300, 100, 'Pintura para acabado final', DATEADD(DAY, -22, GETDATE())),
+(NULL, 105, NULL, NULL, 300, 50, 'Lubricantes para mantenimiento', DATEADD(DAY, -20, GETDATE())),
+(NULL, 106, NULL, NULL, 300, 800, 'Hierro fundido para piezas especiales', DATEADD(DAY, -18, GETDATE())),
+(NULL, 107, NULL, NULL, 300, 300, 'Planchas para puertas industriales', DATEADD(DAY, -16, GETDATE())),
+(NULL, 108, NULL, NULL, 300, 900, 'Tubería para estructuras', DATEADD(DAY, -14, GETDATE())),
+(NULL, 109, NULL, NULL, 300, 150, 'Varillas para soldadura', DATEADD(DAY, -12, GETDATE()));
+
+-- VENTAS DE PRODUCTOS
+INSERT INTO Movimiento (idVenta, idIngreso, idMP, idProducto, idTipoMovimiento, cantidad, observacion, fecha) VALUES
+(100, NULL, NULL, NULL, 301, 2, 'Venta de estructuras para obra civil', DATEADD(DAY, -10, GETDATE())),
+(101, NULL, NULL, NULL, 301, 1, 'Chasis para maquinaria industrial', DATEADD(DAY, -9, GETDATE())),
+(102, NULL, NULL, NULL, 301, 3, 'Puertas reforzadas pedido urgente', DATEADD(DAY, -8, GETDATE())),
+(103, NULL, NULL, NULL, 301, 5, 'Barandas para edificio', DATEADD(DAY, -7, GETDATE())),
+(104, NULL, NULL, NULL, 301, 1, 'Tanque industrial para planta', DATEADD(DAY, -6, GETDATE())),
+(105, NULL, NULL, NULL, 301, 2, 'Componentes fundidos especiales', DATEADD(DAY, -5, GETDATE())),
+(106, NULL, NULL, NULL, 301, 4, 'Gabinetes para instalación eléctrica', DATEADD(DAY, -4, GETDATE())),
+(107, NULL, NULL, NULL, 301, 2, 'Rejillas para pasarela', DATEADD(DAY, -3, GETDATE())),
+(108, NULL, NULL, NULL, 301, 3, 'Soportes para sistema de ventilación', DATEADD(DAY, -2, GETDATE())),
+(109, NULL, NULL, NULL, 301, 1, 'Panel para maquinaria', DATEADD(DAY, -1, GETDATE()));
+
+-- AJUSTES DE MATERIA PRIMA
+INSERT INTO Movimiento (idVenta, idIngreso, idMP, idProducto, idTipoMovimiento, cantidad, observacion, fecha) VALUES
+(NULL, NULL, 1, NULL, 302, 250, 'Ajuste por inventario físico - acero encontrado en depósito secundario', DATEADD(DAY, -5, GETDATE())),
+(NULL, NULL, 4, NULL, 303, 500, 'Ajuste negativo - tornillos defectuosos descartados', DATEADD(DAY, -4, GETDATE())),
+(NULL, NULL, 8, NULL, 302, 50, 'Planchas devueltas de obra - material no utilizado', DATEADD(DAY, -3, GETDATE())),
+(NULL, NULL, 5, NULL, 303, 15, 'Pintura dañada por filtración de agua en depósito', DATEADD(DAY, -2, GETDATE())),
+(NULL, NULL, 9, NULL, 303, 80, 'Tubos descartados por cortes defectuosos y merma normal', DATEADD(DAY, -1, GETDATE()));
+
+-- DEVOLUCIONES DE PRODUCTOS 
+INSERT INTO Movimiento (idVenta, idIngreso, idMP, idProducto, idTipoMovimiento, cantidad, observacion, fecha) VALUES
+(NULL, NULL, NULL, 5, 305, 1, 'Devolución - tanque no cumplía con especificaciones del cliente', DATEADD(HOUR, -48, GETDATE())),
+(NULL, NULL, NULL, 7, 305, 1, 'Devolución - dimensiones incorrectas, se reemplazará', DATEADD(HOUR, -24, GETDATE())),
+(NULL, NULL, NULL, 9, 305, 1, 'Devolución - defecto en soldadura detectado por control de calidad del cliente', DATEADD(HOUR, -12, GETDATE()));
