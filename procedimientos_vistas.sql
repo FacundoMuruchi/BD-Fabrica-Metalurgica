@@ -189,7 +189,7 @@ GO
 -- =============================================
 -- PROCEDIMIENTO 3: Registrar Ajuste de Stock
 -- =============================================
-CREATE OR ALTER PROCEDURE sp_RegistrarAjuste
+CREATE OR ALTER PROCEDURE sp_RegistrarAjustes
     @idMP INT = NULL,
     @idProducto INT = NULL,
     @cantidad DECIMAL(10,2),
