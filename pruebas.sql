@@ -1,9 +1,18 @@
 EXEC sp_RegistrarAjustes
-    @idMP = 1, 
-    @cantidad = 300, 
-    @idUbicacion = 305,
-    @observacion = 'Prueba de nuevo proc';
+    @idMP = 3, 
+    @cantidad = 600, 
+    @idUbicacion = 302,
+    @observacion = 'llegar a 100%';
 GO
+
+EXEC sp_RegistrarIngreso
+    @idProveedor = 1,
+    @idMP = 4,
+    @cantidad = 40,
+    @idUbicacion = 302;
+GO
+
+select * from Ubicacion;
 
 select * from vw_StockGeneral;
 
@@ -13,4 +22,6 @@ select * from vw_MovimientosDetallados;
 
 select * from Movimiento;
 
-SELECT * FROM MateriaPrima
+SELECT * FROM MateriaPrima;
+
+select * from Stock;

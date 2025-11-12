@@ -7,6 +7,7 @@ CREATE OR ALTER PROCEDURE sp_RegistrarIngreso
     @idProveedor INT,
     @idMP INT,
     @cantidad DECIMAL(10,2),
+    @idUbicacion INT,  -- Ubicación donde se almacenará el material
     @observacion VARCHAR(300) = NULL
 AS
 BEGIN
@@ -26,6 +27,13 @@ BEGIN
         IF NOT EXISTS (SELECT 1 FROM MateriaPrima WHERE idMP = @idMP)
         BEGIN
             RAISERROR('La materia prima especificada no existe.', 16, 1);
+            RETURN;
+        END
+        
+        -- Validar que la ubicación existe
+        IF NOT EXISTS (SELECT 1 FROM Ubicacion WHERE idUbicacion = @idUbicacion)
+        BEGIN
+            RAISERROR('La ubicación especificada no existe.', 16, 1);
             RETURN;
         END
         
@@ -57,17 +65,56 @@ BEGIN
         END
         
         -- Registrar el movimiento
-        INSERT INTO Movimiento (idIngreso, idTipoMovimiento, cantidad, observacion)
-        VALUES (@idIngresoNuevo, @idTipoIngreso, @cantidad, @observacion);
+        INSERT INTO Movimiento (idIngreso, idTipoMovimiento, cantidad, observacion, fecha)
+        VALUES (@idIngresoNuevo, @idTipoIngreso, @cantidad, @observacion, GETDATE());
         
-        -- Actualizar stock actual de la materia prima
+        -- Gestión de ubicación física
+        -- Verificar si ya existe stock en esa ubicación para esa materia prima
+        IF EXISTS (SELECT 1 FROM Stock WHERE idUbicacion = @idUbicacion AND idMP = @idMP)
+        BEGIN
+            -- Actualizar cantidad en ubicación existente
+            UPDATE Stock
+            SET cantidad = cantidad + @cantidad
+            WHERE idUbicacion = @idUbicacion AND idMP = @idMP;
+            
+            PRINT 'Stock agregado a ubicación existente';
+        END
+        ELSE
+        BEGIN
+            -- Crear nuevo registro de stock en esa ubicación
+            INSERT INTO Stock (idUbicacion, idMP, cantidad)
+            VALUES (@idUbicacion, @idMP, @cantidad);
+            
+            PRINT 'Nueva ubicación de stock creada';
+        END
+        
+        -- Actualizar stock total de la materia prima
         UPDATE MateriaPrima
         SET stockActual = stockActual + @cantidad
         WHERE idMP = @idMP;
         
         COMMIT TRANSACTION;
         
-        PRINT CONCAT('Ingreso registrado exitosamente! ID Ingreso: ', @idIngresoNuevo);
+        -- Obtener información de la ubicación para el mensaje
+        DECLARE @nombreDeposito VARCHAR(100);
+        DECLARE @pasillo INT, @columna CHAR(1), @nivel INT;
+        
+        SELECT 
+            @nombreDeposito = d.nombre,
+            @pasillo = u.pasillo,
+            @columna = u.columna,
+            @nivel = u.nivel
+        FROM Ubicacion u
+        JOIN Deposito d ON u.idDeposito = d.idDeposito
+        WHERE u.idUbicacion = @idUbicacion;
+        
+        PRINT '==============================================';
+        PRINT 'Ingreso registrado exitosamente';
+        PRINT 'ID Ingreso: ' + CAST(@idIngresoNuevo AS VARCHAR(10));
+        PRINT 'Cantidad: ' + CAST(@cantidad AS VARCHAR(20));
+        PRINT 'Ubicación: ' + @nombreDeposito + ' - Pasillo ' + CAST(@pasillo AS VARCHAR) + 
+              ', Columna ' + @columna + ', Nivel ' + CAST(@nivel AS VARCHAR);
+        PRINT '==============================================';
         
     END TRY
     BEGIN CATCH
@@ -385,6 +432,21 @@ END;
 GO
 
 -- =============================================
+-- FUNCION
+-- =============================================
+CREATE OR ALTER FUNCTION fn_PorcentajeOcupacion (@idMP INT)
+RETURNS DECIMAL(10,2)
+AS
+BEGIN
+    DECLARE @actual DECIMAL(10,2), @max DECIMAL(10,2);
+    SELECT @actual = stockActual, @max = stockMax FROM MateriaPrima WHERE idMP = @idMP;
+
+    IF @max IS NULL OR @max = 0 RETURN NULL;
+    RETURN ROUND((@actual / @max) * 100, 2);
+END;
+GO
+
+-- =============================================
 -- VISTAS
 -- =============================================
 
@@ -414,10 +476,11 @@ SELECT
     mp.idMP,
     mp.nombre,
     mp.stockActual AS stockRegistrado,
-    SUM(s.cantidad) AS stockEnUbicaciones
+    SUM(s.cantidad) AS stockEnUbicaciones,
+    CONCAT(dbo.fn_PorcentajeOcupacion(mp.idMP) , '%')AS porcentajeOcupacion
 FROM MateriaPrima mp
 JOIN Stock s ON mp.idMP = s.idMP
-GROUP BY mp.idMP, mp.nombre, mp.stockActual;
+GROUP BY mp.idMP, mp.nombre, mp.stockActual;
 GO
 
 -- =============================================
@@ -434,7 +497,8 @@ SELECT
     u.nivel,
     s.cantidad AS stockUbicacion,
     mp.stockActual AS stockTotal,
-    CONCAT('P', u.pasillo, '-C', u.columna, '-N', u.nivel) AS codigoUbicacion
+    CONCAT('P', u.pasillo, '-C', u.columna, '-N', u.nivel) AS codigoUbicacion,
+    u.idUbicacion
 FROM Stock s
 JOIN MateriaPrima mp ON s.idMP = mp.idMP
 JOIN Ubicacion u ON s.idUbicacion = u.idUbicacion
