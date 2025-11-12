@@ -4,14 +4,8 @@ GO
 -- =============================================
 -- TRIGGER: Alertas de Stock por Pantalla
 -- =============================================
--- Se dispara automáticamente cuando se actualiza
--- el stockActual de una materia prima
--- Muestra mensajes de alerta si:
--- - Stock actual < Stock mínimo (BAJO)
--- - Stock actual > Stock máximo (ALTO)
--- =============================================
 
-CREATE OR ALTER TRIGGER trgAlertaStockPantalla
+CREATE OR ALTER TRIGGER trg_AlertaStockPantalla
 ON MateriaPrima
 AFTER UPDATE
 AS
@@ -47,5 +41,21 @@ BEGIN
         ELSE
             PRINT 'Stock actualizado correctamente. Niveles dentro de los límites establecidos.';
     END;
+END;
+GO
+
+-- =============================================
+-- TRIGGER: Prevenir eliminacion en Movimientos
+-- =============================================
+CREATE TRIGGER trg_PreventMovimientoDelete
+ON Movimiento
+INSTEAD OF DELETE
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Lanza un error y revierte la transacción
+    RAISERROR ('La eliminación de movimientos está prohibida para mantener la integridad de la auditoría.', 16, 1);
+    ROLLBACK TRANSACTION;
 END;
 GO
