@@ -193,6 +193,7 @@ CREATE OR ALTER PROCEDURE sp_RegistrarAjustes
     @idMP INT = NULL,
     @idProducto INT = NULL,
     @cantidad DECIMAL(10,2),
+    @idUbicacion INT = NULL,  -- Ubicación donde se hace el ajuste
     @observacion VARCHAR(300) = NULL
 AS
 BEGIN
@@ -238,23 +239,104 @@ BEGIN
                 RETURN;
             END
             
-            -- Validar que no se genera stock negativo
+            -- Validar que no se genera stock negativo en MateriaPrima
             DECLARE @stockActualMP DECIMAL(10,2);
             SELECT @stockActualMP = stockActual FROM MateriaPrima WHERE idMP = @idMP;
             
             IF (@stockActualMP + @cantidad) < 0
             BEGIN
-                RAISERROR('El ajuste generaría stock negativo.', 16, 1);
+                RAISERROR('El ajuste generaría stock negativo en el total.', 16, 1);
                 RETURN;
             END
             
-            -- Actualizar stock de materia prima
+            -- *** NUEVA LÓGICA: Gestión de ubicaciones ***
+            IF @idUbicacion IS NOT NULL
+            BEGIN
+                -- Validar que la ubicación existe
+                IF NOT EXISTS (SELECT 1 FROM Ubicacion WHERE idUbicacion = @idUbicacion)
+                BEGIN
+                    RAISERROR('La ubicación especificada no existe.', 16, 1);
+                    RETURN;
+                END
+                
+                -- Verificar si ya existe un registro de stock en esa ubicación
+                IF EXISTS (SELECT 1 FROM Stock WHERE idUbicacion = @idUbicacion AND idMP = @idMP)
+                BEGIN
+                    -- Validar que no se genera stock negativo en la ubicación
+                    DECLARE @stockUbicacion DECIMAL(10,2);
+                    SELECT @stockUbicacion = cantidad 
+                    FROM Stock 
+                    WHERE idUbicacion = @idUbicacion AND idMP = @idMP;
+                    
+                    IF (@stockUbicacion + @cantidad) < 0
+                    BEGIN
+                        RAISERROR('El ajuste generaría stock negativo en la ubicación especificada.', 16, 1);
+                        RETURN;
+                    END
+                    
+                    -- Actualizar cantidad en la ubicación existente
+                    UPDATE Stock
+                    SET cantidad = cantidad + @cantidad
+                    WHERE idUbicacion = @idUbicacion AND idMP = @idMP;
+                    
+                    PRINT 'Stock actualizado en ubicación existente';
+                END
+                ELSE
+                BEGIN
+                    -- Solo permitir crear nueva ubicación si es ajuste positivo
+                    IF @cantidad < 0
+                    BEGIN
+                        RAISERROR('No existe stock en la ubicación especificada para descontar.', 16, 1);
+                        RETURN;
+                    END
+                    
+                    -- Crear nuevo registro de stock en esa ubicación
+                    INSERT INTO Stock (idUbicacion, idMP, cantidad)
+                    VALUES (@idUbicacion, @idMP, @cantidad);
+                    
+                    PRINT 'Nueva ubicación de stock creada';
+                END
+            END
+            ELSE
+            BEGIN
+                -- Si no se especifica ubicación, buscar automáticamente una ubicación con stock
+                IF @cantidad < 0  -- Solo para ajustes negativos
+                BEGIN
+                    -- Intentar descontar de la ubicación con más stock
+                    SELECT TOP 1 @idUbicacion = idUbicacion
+                    FROM Stock
+                    WHERE idMP = @idMP AND cantidad >= ABS(@cantidad)
+                    ORDER BY cantidad DESC;
+                    
+                    IF @idUbicacion IS NULL
+                    BEGIN
+                        RAISERROR('No hay ubicación con stock suficiente. Debe especificar @idUbicacion.', 16, 1);
+                        RETURN;
+                    END
+                    
+                    -- Actualizar stock en la ubicación encontrada
+                    UPDATE Stock
+                    SET cantidad = cantidad + @cantidad  -- @cantidad es negativo
+                    WHERE idUbicacion = @idUbicacion AND idMP = @idMP;
+                    
+                    PRINT 'Stock descontado automáticamente de ubicación con mayor disponibilidad';
+                END
+                ELSE
+                BEGIN
+                    RAISERROR('Para ajustes positivos debe especificar la ubicación (@idUbicacion).', 16, 1);
+                    RETURN;
+                END
+            END
+            
+            -- Actualizar stock total de materia prima
             UPDATE MateriaPrima
             SET stockActual = stockActual + @cantidad
             WHERE idMP = @idMP;
+            
+            PRINT 'Stock total de materia prima actualizado';
         END
         
-        -- Si es ajuste de producto solo registra el movimiento para auditoría
+        -- Si es ajuste de producto (solo auditoría, sin ubicaciones)
         IF @idProducto IS NOT NULL
         BEGIN
             -- Validar que el producto existe
@@ -278,14 +360,18 @@ BEGIN
         END
         
         -- Registrar el movimiento de ajuste
-        INSERT INTO Movimiento (idMP, idProducto, idTipoMovimiento, cantidad, observacion)
-        VALUES (@idMP, @idProducto, @idTipoAjuste, ABS(@cantidad), @observacion);
+        INSERT INTO Movimiento (idMP, idProducto, idTipoMovimiento, cantidad, observacion, fecha)
+        VALUES (@idMP, @idProducto, @idTipoAjuste, ABS(@cantidad), @observacion, GETDATE());
         
         COMMIT TRANSACTION;
         
         DECLARE @tipoItem VARCHAR(50) = CASE WHEN @idMP IS NOT NULL THEN 'Materia Prima' ELSE 'Producto' END;
+        PRINT '==============================================';
         PRINT 'Ajuste registrado exitosamente para ' + @tipoItem;
-        PRINT CONCAT('Tipo: ', @tipoAjuste, ', Cantidad: ', @cantidad);
+        PRINT 'Tipo: ' + @tipoAjuste + ', Cantidad: ' + CAST(@cantidad AS VARCHAR(20));
+        IF @idUbicacion IS NOT NULL
+            PRINT 'Ubicación: ' + CAST(@idUbicacion AS VARCHAR(10));
+        PRINT '==============================================';
         
     END TRY
     BEGIN CATCH
@@ -296,3 +382,61 @@ BEGIN
         RAISERROR(@ErrorMsg, 16, 1);
     END CATCH
 END;
+GO
+
+-- =============================================
+-- VISTAS
+-- =============================================
+
+-- =============================================
+-- VISTA1: MUESTRA MOVIMIENTOS CON DETALLE
+-- =============================================
+CREATE OR ALTER VIEW vw_MovimientosDetallados AS
+SELECT 
+    m.idMovimiento,
+    m.fecha,
+    tm.tipo AS tipoMovimiento,
+    m.cantidad,
+    m.observacion,
+    m.idIngreso,
+    m.idVenta,
+    m.idMP,
+    m.idProducto
+FROM Movimiento m
+JOIN TipoMovimiento tm ON m.idTipoMovimiento = tm.idTipoMovimiento;
+GO
+
+-- =============================================
+-- VISTA2: MUESTRA STOCK GENERAL
+-- =============================================
+CREATE OR ALTER VIEW vw_StockGeneral AS
+SELECT 
+    mp.idMP,
+    mp.nombre,
+    mp.stockActual AS stockRegistrado,
+    SUM(s.cantidad) AS stockEnUbicaciones
+FROM MateriaPrima mp
+JOIN Stock s ON mp.idMP = s.idMP
+GROUP BY mp.idMP, mp.nombre, mp.stockActual;
+GO
+
+-- =============================================
+-- VISTA3: MUESTRA STOCK POR UBICACION
+-- =============================================
+CREATE OR ALTER VIEW vw_StockPorUbicacion AS
+SELECT 
+    s.idStock,
+    mp.idMP,
+    mp.nombre AS materiaPrima,
+    d.nombre AS deposito,
+    u.pasillo,
+    u.columna,
+    u.nivel,
+    s.cantidad AS stockUbicacion,
+    mp.stockActual AS stockTotal,
+    CONCAT('P', u.pasillo, '-C', u.columna, '-N', u.nivel) AS codigoUbicacion
+FROM Stock s
+JOIN MateriaPrima mp ON s.idMP = mp.idMP
+JOIN Ubicacion u ON s.idUbicacion = u.idUbicacion
+JOIN Deposito d ON u.idDeposito = d.idDeposito;
+GO
