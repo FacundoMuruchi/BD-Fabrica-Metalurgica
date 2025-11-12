@@ -65,8 +65,8 @@ BEGIN
         END
         
         -- Registrar el movimiento
-        INSERT INTO Movimiento (idIngreso, idTipoMovimiento, cantidad, observacion, fecha)
-        VALUES (@idIngresoNuevo, @idTipoIngreso, @cantidad, @observacion, GETDATE());
+        INSERT INTO Movimiento (idIngreso, idTipoMovimiento, cantidad, observacion)
+        VALUES (@idIngresoNuevo, @idTipoIngreso, @cantidad, @observacion);
         
         -- Gestión de ubicación física
         -- Verificar si ya existe stock en esa ubicación para esa materia prima
@@ -134,6 +134,7 @@ CREATE OR ALTER PROCEDURE sp_RegistrarVenta
     @idProducto INT,
     @idCliente INT,
     @cantidadProductos INT,
+    @idUbicacion INT,
     @observacion VARCHAR(300) = NULL
 AS
 BEGIN
@@ -163,18 +164,19 @@ BEGIN
             RETURN;
         END
         
-        -- Verificar que hay suficiente materia prima para producir
+        -- Verificar que hay suficiente materia prima EN LA UBICACIÓN ESPECIFICADA
         DECLARE @mpInsuficiente VARCHAR(100);
         
         SELECT TOP 1 @mpInsuficiente = mp.nombre
         FROM ProductoMP pmp
-        INNER JOIN MateriaPrima mp ON pmp.idMP = mp.idMP
+        JOIN MateriaPrima mp ON pmp.idMP = mp.idMP
+        LEFT JOIN Stock s ON pmp.idMP = s.idMP AND s.idUbicacion = @idUbicacion
         WHERE pmp.idProducto = @idProducto
-          AND mp.stockActual < (pmp.cantNecesaria * @cantidadProductos);
+          AND (s.cantidad IS NULL OR s.cantidad < (pmp.cantNecesaria * @cantidadProductos)); -- Comprobar stock en ubicación
         
         IF @mpInsuficiente IS NOT NULL
         BEGIN
-            DECLARE @msgError VARCHAR(200) = 'Stock insuficiente de materia prima: ' + @mpInsuficiente;
+            DECLARE @msgError VARCHAR(200) = 'Stock insuficiente de materia prima: ' + @mpInsuficiente + ' en la ubicación ' + CAST(@idUbicacion AS VARCHAR);
             RAISERROR(@msgError, 16, 1);
             RETURN;
         END
@@ -210,11 +212,19 @@ BEGIN
         INSERT INTO Movimiento (idVenta, idTipoMovimiento, cantidad, observacion)
         VALUES (@idVentaNueva, @idTipoSalida, @cantidadProductos, @observacion);
         
-        -- Descontar las materias primas necesarias
+        -- Descontar del stock en la ubicación
+        UPDATE s
+        SET s.cantidad = s.cantidad - (pmp.cantNecesaria * @cantidadProductos)
+        FROM Stock s
+        JOIN ProductoMP pmp ON s.idMP = pmp.idMP
+        WHERE pmp.idProducto = @idProducto
+          AND s.idUbicacion = @idUbicacion;
+        
+        -- Descontar del stock total
         UPDATE mp
         SET mp.stockActual = mp.stockActual - (pmp.cantNecesaria * @cantidadProductos)
         FROM MateriaPrima mp
-        INNER JOIN ProductoMP pmp ON mp.idMP = pmp.idMP
+        JOIN ProductoMP pmp ON mp.idMP = pmp.idMP
         WHERE pmp.idProducto = @idProducto;
         
         COMMIT TRANSACTION;
@@ -429,78 +439,4 @@ BEGIN
         RAISERROR(@ErrorMsg, 16, 1);
     END CATCH
 END;
-GO
-
--- =============================================
--- FUNCION
--- =============================================
-CREATE OR ALTER FUNCTION fn_PorcentajeOcupacion (@idMP INT)
-RETURNS DECIMAL(10,2)
-AS
-BEGIN
-    DECLARE @actual DECIMAL(10,2), @max DECIMAL(10,2);
-    SELECT @actual = stockActual, @max = stockMax FROM MateriaPrima WHERE idMP = @idMP;
-
-    IF @max IS NULL OR @max = 0 RETURN NULL;
-    RETURN ROUND((@actual / @max) * 100, 2);
-END;
-GO
-
--- =============================================
--- VISTAS
--- =============================================
-
--- =============================================
--- VISTA1: MUESTRA MOVIMIENTOS CON DETALLE
--- =============================================
-CREATE OR ALTER VIEW vw_MovimientosDetallados AS
-SELECT 
-    m.idMovimiento,
-    m.fecha,
-    tm.tipo AS tipoMovimiento,
-    m.cantidad,
-    m.observacion,
-    m.idIngreso,
-    m.idVenta,
-    m.idMP,
-    m.idProducto
-FROM Movimiento m
-JOIN TipoMovimiento tm ON m.idTipoMovimiento = tm.idTipoMovimiento;
-GO
-
--- =============================================
--- VISTA2: MUESTRA STOCK GENERAL
--- =============================================
-CREATE OR ALTER VIEW vw_StockGeneral AS
-SELECT 
-    mp.idMP,
-    mp.nombre,
-    mp.stockActual AS stockRegistrado,
-    SUM(s.cantidad) AS stockEnUbicaciones,
-    CONCAT(dbo.fn_PorcentajeOcupacion(mp.idMP) , '%')AS porcentajeOcupacion
-FROM MateriaPrima mp
-JOIN Stock s ON mp.idMP = s.idMP
-GROUP BY mp.idMP, mp.nombre, mp.stockActual;
-GO
-
--- =============================================
--- VISTA3: MUESTRA STOCK POR UBICACION
--- =============================================
-CREATE OR ALTER VIEW vw_StockPorUbicacion AS
-SELECT 
-    s.idStock,
-    mp.idMP,
-    mp.nombre AS materiaPrima,
-    d.nombre AS deposito,
-    u.pasillo,
-    u.columna,
-    u.nivel,
-    s.cantidad AS stockUbicacion,
-    mp.stockActual AS stockTotal,
-    CONCAT('P', u.pasillo, '-C', u.columna, '-N', u.nivel) AS codigoUbicacion,
-    u.idUbicacion
-FROM Stock s
-JOIN MateriaPrima mp ON s.idMP = mp.idMP
-JOIN Ubicacion u ON s.idUbicacion = u.idUbicacion
-JOIN Deposito d ON u.idDeposito = d.idDeposito;
 GO
