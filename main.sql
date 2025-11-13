@@ -1,9 +1,12 @@
+use induestant;
+GO
+
 -- PRUEBA AJUSTE
 EXEC sp_RegistrarAjustes
     @idMP = 1, 
     @cantidad = 1000, 
     @idUbicacion = 303,
-    @observacion = 'probando';
+    @observacion = 'probando ajuste';
 GO
 
 -- PRUEBA INGRESO
@@ -11,7 +14,8 @@ EXEC sp_RegistrarIngreso
     @idProveedor = 1,
     @idMP = 1,
     @cantidad = 300,
-    @idUbicacion = 303;
+    @idUbicacion = 303,
+    @observacion = 'probando ingreso';
 GO
 
 --PRUEBA VENTA

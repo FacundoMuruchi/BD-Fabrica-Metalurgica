@@ -33,18 +33,31 @@ SELECT
     tm.tipo AS tipoMovimiento,
     m.cantidad,
     m.observacion,
-    mp.nombre AS materiaPrima,
+
+    prov.razonSocial AS proveedor,
+    -- Nombre de materia prima desde Movimiento o desde Ingreso
+    COALESCE(mp.nombre, mp_i.nombre) AS materiaPrima,
+    
     c.razonSocial AS cliente,
-    p.nombre AS nombreProducto,
-    prov.razonSocial AS proveedor
+    -- Nombre de producto desde Movimiento o desde Venta
+    COALESCE(p.nombre, p_v.nombre) AS nombreProducto
+
 FROM Movimiento m
 JOIN TipoMovimiento tm ON m.idTipoMovimiento = tm.idTipoMovimiento
-LEFT JOIN Ingreso i on i.idIngreso = m.idIngreso
-LEFT JOIN Venta v on v.idVenta = m.idVenta
-LEFT JOIN Producto p on p.idProducto = m.idProducto
-LEFT JOIN MateriaPrima mp on mp.idMP = m.idMP
-LEFT JOIN Proveedor prov on prov.idProveedor = i.idProveedor
-LEFT JOIN Cliente c on c.idCliente = v.idCliente;
+LEFT JOIN Ingreso i ON i.idIngreso = m.idIngreso
+LEFT JOIN Venta v ON v.idVenta = m.idVenta
+
+-- Tablas de producto/materia prima directamente referenciadas por Movimiento
+LEFT JOIN MateriaPrima mp ON mp.idMP = m.idMP
+LEFT JOIN Producto p ON p.idProducto = m.idProducto
+
+-- Tablas de producto/materia prima referenciadas a través de Ingreso/Venta
+LEFT JOIN MateriaPrima mp_i ON mp_i.idMP = i.idMP
+LEFT JOIN Producto p_v ON p_v.idProducto = v.idProducto
+
+-- Entidades comerciales
+LEFT JOIN Proveedor prov ON prov.idProveedor = i.idProveedor
+LEFT JOIN Cliente c ON c.idCliente = v.idCliente;
 GO
 
 -- =============================================
