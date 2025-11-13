@@ -2,7 +2,7 @@
 GO
 
 -- =============================================
--- TRIGGER: Alertas de Stock por Pantalla
+-- TRIGGER1: Alertas de Stock por Pantalla
 -- =============================================
 
 CREATE OR ALTER TRIGGER trg_AlertaStockPantalla
@@ -45,7 +45,7 @@ END;
 GO
 
 -- =============================================
--- TRIGGER: Prevenir eliminacion en Movimientos
+-- TRIGGER2: Prevenir eliminacion en Movimientos
 -- =============================================
 CREATE TRIGGER trg_PreventMovimientoDelete
 ON Movimiento

@@ -2,7 +2,7 @@ use induestant;
 GO
 
 -- =============================================
--- FUNCION
+-- FUNCION: OBTENER PORCENTAJE DE STOCK POR MP
 -- =============================================
 CREATE OR ALTER FUNCTION fn_PorcentajeOcupacion (@idMP INT)
 RETURNS DECIMAL(10,2)
@@ -19,7 +19,6 @@ BEGIN
 END;
 GO
 
-
 -- =============================================
 -- VISTAS
 -- =============================================
@@ -34,12 +33,18 @@ SELECT
     tm.tipo AS tipoMovimiento,
     m.cantidad,
     m.observacion,
-    m.idIngreso,
-    m.idVenta,
-    m.idMP,
-    m.idProducto
+    mp.nombre AS materiaPrima,
+    c.razonSocial AS cliente,
+    p.nombre AS nombreProducto,
+    prov.razonSocial AS proveedor
 FROM Movimiento m
-JOIN TipoMovimiento tm ON m.idTipoMovimiento = tm.idTipoMovimiento;
+JOIN TipoMovimiento tm ON m.idTipoMovimiento = tm.idTipoMovimiento
+LEFT JOIN Ingreso i on i.idIngreso = m.idIngreso
+LEFT JOIN Venta v on v.idVenta = m.idVenta
+LEFT JOIN Producto p on p.idProducto = m.idProducto
+LEFT JOIN MateriaPrima mp on mp.idMP = m.idMP
+LEFT JOIN Proveedor prov on prov.idProveedor = i.idProveedor
+LEFT JOIN Cliente c on c.idCliente = v.idCliente;
 GO
 
 -- =============================================
@@ -79,13 +84,16 @@ JOIN Deposito d ON u.idDeposito = d.idDeposito
 JOIN UnidadMedida um on um.idUnidadMedida = mp.idUnidadMedida;
 GO
 
+-- =============================================
+-- VISTA4: MUESTRA CANTIDAD NECESARIA
+-- =============================================
 CREATE OR ALTER VIEW vw_RecetaProducto AS
 SELECT
     p.idProducto,
     p.nombre AS producto,
     p.descripcion,
     mp.idMP,
-    CONCAT(pmp.cantNecesaria, ' ', um.unidad, ' de ', mp.nombre) AS cantidadNecesaria,
+    CONCAT(pmp.cantNecesaria, ' ', um.unidad, ' de ', mp.nombre) AS cantidadNecesariaDeMP,
     p.tFabricacion AS horasFabricacion,
     p.pUnitario
 FROM ProductoMP pmp
